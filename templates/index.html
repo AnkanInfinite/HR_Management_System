@@ -3,109 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> HR Management System</title>
+    <title>HRMS - Perfectly Aligned</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div id="app">
-        <div id="login-section" class="active">
-            <div class="login-card">
-                <h2>HRMS Sign In</h2>
-                <form id="login-form">
-                    <input type="email" id="email" placeholder="Employee Email" required>
-                    <input type="password" id="password" placeholder="Password" required>
-                    <button type="submit" class="btn primary-btn">Sign In</button>
-                </form>
-            </div>
+    <nav id="navbar" class="hidden">
+        <div class="nav-brand"><i class="fas fa-users-cog"></i> HRMS</div>
+        <div class="nav-menu">
+            <span id="nav-user-name"></span>
+            <button onclick="app.logout()" class="btn-danger"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
+    </nav>
 
-        <div id="dashboard-section" class="hidden">
-            <nav class="sidebar">
-                <div class="logo">Odoo HRMS</div>
-                <ul class="nav-links">
-                    <li onclick="showTab('profile')"><i class="fas fa-user"></i> My Profile</li>
-                    <li onclick="showTab('attendance')"><i class="fas fa-calendar-check"></i> Attendance</li>
-                    <li onclick="showTab('leave')"><i class="fas fa-plane-departure"></i> Time Off</li>
-                    <li onclick="showTab('payroll')"><i class="fas fa-money-check-alt"></i> Salary Info</li>
-                    <li onclick="logout()" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</li>
-                </ul>
-            </nav>
-            
-            <main class="content">
-                <header>
-                    <h1 id="page-title">My Profile</h1>
-                </header>
-                
-                <div id="profile" class="tab-content active">
-                    <div class="card profile-card">
-                        <img src="https://via.placeholder.com/120" alt="Profile" class="avatar">
-                        <div class="info">
-                            <h2 id="prof-name">Loading...</h2>
-                            <p id="prof-role" class="subtitle">Loading...</p>
-                            <div class="contact-info">
-                                <span><i class="fas fa-envelope"></i> <span id="prof-email"></span></span>
-                                <span><i class="fas fa-phone"></i> <span id="prof-mobile"></span></span>
-                                <span><i class="fas fa-building"></i> <span id="prof-dept"></span></span>
-                            </div>
+    <main id="app-container">
+        <section id="auth-section" class="active-section">
+            <div class="auth-container">
+                <div class="auth-box">
+                    <h2>Sign In</h2>
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="login-email" required>
                         </div>
-                    </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn-primary w-100">Sign In</button>
+                    </form>
+                    <p class="text-center mt-3">Don't have an account? <a href="#" onclick="app.toggleAuth()">Sign Up</a></p>
                 </div>
 
-                <div id="attendance" class="tab-content hidden">
-                    <div class="card">
-                        <h2>Daily Check-In</h2>
-                        <div class="action-grid">
-                            <button class="btn present" onclick="markAttendance('Present')">Present (Check In)</button>
-                            <button class="btn halfday" onclick="markAttendance('Half-day')">Half Day</button>
-                            <button class="btn absent" onclick="markAttendance('Absent')">Absent</button>
+                <div class="auth-box hidden" id="signup-box">
+                    <h2>Sign Up</h2>
+                    <form id="signup-form">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="signup-name" required>
                         </div>
-                        <p id="attendance-status" class="status-msg"></p>
-                    </div>
-                </div>
-
-                <div id="leave" class="tab-content hidden">
-                    <div class="card">
-                        <h2>Apply for Leave</h2>
-                        <form id="leave-form">
-                            <select id="leave-type" required>
-                                <option value="" disabled selected>Select Leave Type</option>
-                                <option value="Paid">Paid Leave</option>
-                                <option value="Sick">Sick Leave</option>
-                                <option value="Unpaid">Unpaid Leave</option>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="signup-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="signup-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select id="signup-role">
+                                <option value="Employee">Employee</option>
+                                <option value="Admin">Admin / HR Officer</option>
                             </select>
-                            <div class="date-group">
-                                <input type="date" id="leave-start" required>
-                                <input type="date" id="leave-end" required>
-                            </div>
-                            <textarea id="leave-remarks" placeholder="Remarks / Reason" rows="3" required></textarea>
-                            <button type="submit" class="btn primary-btn">Submit Request</button>
-                        </form>
-                    </div>
+                        </div>
+                        <button type="submit" class="btn-primary w-100">Sign Up</button>
+                    </form>
+                    <p class="text-center mt-3">Already have an account? <a href="#" onclick="app.toggleAuth()">Sign In</a></p>
                 </div>
+            </div>
+        </section>
 
-                <div id="payroll" class="tab-content hidden">
-                    <div class="card">
-                        <h2>Monthly Wage Components</h2>
-                        <div class="payroll-stats">
-                            <div class="stat">
-                                <h3>Basic Salary</h3>
-                                <p>₹ 25,000.00</p>
-                            </div>
-                            <div class="stat">
-                                <h3>Allowances (HRA, Fixed)</h3>
-                                <p>₹ 12,500.00</p>
-                            </div>
-                            <div class="stat total">
-                                <h3>Net Monthly</h3>
-                                <p>₹ 37,500.00</p>
-                            </div>
+        <section id="dashboard-section" class="hidden">
+            <div class="dashboard-grid">
+                
+                <aside class="sidebar">
+                    <ul class="sidebar-menu">
+                        <li onclick="app.showTab('profile')"><i class="fas fa-user"></i> Profile</li>
+                        <li onclick="app.showTab('attendance')"><i class="fas fa-clock"></i> Attendance</li>
+                        <li onclick="app.showTab('leaves')"><i class="fas fa-calendar-alt"></i> Leave / Time-Off</li>
+                        <li id="admin-menu-leaves" class="hidden" onclick="app.showTab('admin-leaves')"><i class="fas fa-check-circle"></i> Leave Approvals</li>
+                    </ul>
+                </aside>
+
+                <div class="content-area">
+                    <div id="tab-profile" class="tab-content active-tab">
+                        <h3>My Profile</h3>
+                        <div class="card">
+                            <form id="profile-form">
+                                <div class="form-row">
+                                    <div class="form-group"><label>Name</label><input type="text" id="prof-name"></div>
+                                    <div class="form-group"><label>Email</label><input type="email" id="prof-email" readonly></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>Phone</label><input type="text" id="prof-phone"></div>
+                                    <div class="form-group"><label>Address</label><input type="text" id="prof-address"></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>Job Title</label><input type="text" id="prof-job" readonly></div>
+                                    <div class="form-group"><label>Salary</label><input type="text" id="prof-salary" readonly></div>
+                                </div>
+                                <button type="submit" class="btn-primary mt-3">Update Profile</button>
+                            </form>
                         </div>
                     </div>
+
+                    <div id="tab-attendance" class="tab-content hidden">
+                        <h3>Attendance Tracking</h3>
+                        <div class="card action-card">
+                            <button id="btn-checkin" class="btn-success" onclick="app.markAttendance('check-in')">Check In</button>
+                            <button id="btn-checkout" class="btn-danger" onclick="app.markAttendance('check-out')">Check Out</button>
+                        </div>
+                        <div class="card mt-3">
+                            <h4>Recent Attendance</h4>
+                            <table class="data-table">
+                                <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Status</th></tr></thead>
+                                <tbody id="attendance-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="tab-leaves" class="tab-content hidden">
+                        <h3>Apply for Leave</h3>
+                        <div class="card">
+                            <form id="leave-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Leave Type</label>
+                                        <select id="leave-type" required>
+                                            <option value="Paid">Paid</option>
+                                            <option value="Sick">Sick</option>
+                                            <option value="Unpaid">Unpaid</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>Start Date</label><input type="date" id="leave-start" required></div>
+                                    <div class="form-group"><label>End Date</label><input type="date" id="leave-end" required></div>
+                                </div>
+                                <div class="form-group"><label>Remarks</label><textarea id="leave-remarks" rows="2"></textarea></div>
+                                <button type="submit" class="btn-primary mt-3">Submit Request</button>
+                            </form>
+                        </div>
+                        <div class="card mt-3">
+                            <h4>My Leave Requests</h4>
+                            <table class="data-table">
+                                <thead><tr><th>Type</th><th>Dates</th><th>Status</th></tr></thead>
+                                <tbody id="my-leaves-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="tab-admin-leaves" class="tab-content hidden">
+                        <h3>Leave Approvals</h3>
+                        <div class="card">
+                            <table class="data-table">
+                                <thead><tr><th>Employee UID</th><th>Type</th><th>Dates</th><th>Status</th><th>Action</th></tr></thead>
+                                <tbody id="admin-leaves-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
-            </main>
-        </div>
-    </div>
+            </div>
+        </section>
+    </main>
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
