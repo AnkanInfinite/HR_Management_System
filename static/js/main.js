@@ -39,7 +39,7 @@ const app = {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
-        
+
         try {
             const res = await this.request('/api/login', 'POST', { email, password });
             if (res.user) {
@@ -98,7 +98,7 @@ const app = {
     async loadAdminEmployees() {
         // FIX: Pass requester_uid to prove Admin status
         const users = await this.request(`/api/users?requester_uid=${this.user.uid}`);
-        
+
         if (users.error) {
             alert(users.error); // Will alert if an employee somehow triggers this
             return;
@@ -116,31 +116,31 @@ const app = {
                 </td>
             </tr>
         `).join('');
-        
+
         document.getElementById('admin-edit-employee-section').classList.add('hidden');
     },
 
-async editEmployee(uid) {
-    // Fetch fresh data for the selected employee
-    const user = await this.request(`/api/users/${uid}`);
-    
-    // Populate form
-    document.getElementById('edit-emp-uid').value = user.uid;
-    document.getElementById('edit-emp-name').value = user.name || '';
-    document.getElementById('edit-emp-role').value = user.role || 'Employee';
-    document.getElementById('edit-emp-phone').value = user.phone || '';
-    document.getElementById('edit-emp-address').value = user.address || '';
-    document.getElementById('edit-emp-job').value = user.job_title || '';
-    document.getElementById('edit-emp-salary').value = user.salary || '';
-    
-    // Show form
-    document.getElementById('admin-edit-employee-section').classList.remove('hidden');
-    
-    // Scroll to form
-    document.getElementById('admin-edit-employee-section').scrollIntoView({ behavior: 'smooth' });
-},
+    async editEmployee(uid) {
+        // Fetch fresh data for the selected employee
+        const user = await this.request(`/api/users/${uid}`);
 
-async saveEmployeeChanges(e) {
+        // Populate form
+        document.getElementById('edit-emp-uid').value = user.uid;
+        document.getElementById('edit-emp-name').value = user.name || '';
+        document.getElementById('edit-emp-role').value = user.role || 'Employee';
+        document.getElementById('edit-emp-phone').value = user.phone || '';
+        document.getElementById('edit-emp-address').value = user.address || '';
+        document.getElementById('edit-emp-job').value = user.job_title || '';
+        document.getElementById('edit-emp-salary').value = user.salary || '';
+
+        // Show form
+        document.getElementById('admin-edit-employee-section').classList.remove('hidden');
+
+        // Scroll to form
+        document.getElementById('admin-edit-employee-section').scrollIntoView({ behavior: 'smooth' });
+    },
+
+    async saveEmployeeChanges(e) {
         e.preventDefault();
         const uid = document.getElementById('edit-emp-uid').value;
         const data = {
@@ -152,17 +152,17 @@ async saveEmployeeChanges(e) {
             job_title: document.getElementById('edit-emp-job').value,
             salary: document.getElementById('edit-emp-salary').value
         };
-        
+
         await this.request(`/api/users/${uid}`, 'PUT', data);
         alert('Employee details updated successfully');
-        
-        this.loadAdminEmployees(); 
+
+        this.loadAdminEmployees();
     },
 
     showTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
         document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-        
+
         if (tabId === 'profile') this.loadProfile();
         if (tabId === 'attendance') this.loadAttendance();
         if (tabId === 'leaves') this.loadLeaves();
@@ -216,6 +216,7 @@ async saveEmployeeChanges(e) {
         e.preventDefault();
         const data = {
             uid: this.user.uid,
+            name: this.user.name, // FIX: Send the employee's name to the backend
             type: document.getElementById('leave-type').value,
             start_date: document.getElementById('leave-start').value,
             end_date: document.getElementById('leave-end').value,
@@ -225,6 +226,7 @@ async saveEmployeeChanges(e) {
         document.getElementById('leave-form').reset();
         this.loadLeaves();
     },
+
 
     async loadLeaves() {
         const records = await this.request(`/api/leaves?uid=${this.user.uid}`);
@@ -238,15 +240,29 @@ async saveEmployeeChanges(e) {
         `).join('');
     },
 
+
     async loadAdminLeaves() {
-        const records = await this.request('/api/leaves');
+        // FIX: Pass requester_uid to prove Admin status to the backend
+        const records = await this.request(`/api/leaves?requester_uid=${this.user.uid}`);
+
+        if (records.error) {
+            console.error(records.error);
+            return;
+        }
+
         const tbody = document.getElementById('admin-leaves-tbody');
+
+        // Show a nice message if there are no applications yet
+        if (records.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 1rem;">No leave applications pending.</td></tr>';
+            return;
+        }
+
         tbody.innerHTML = records.map(r => `
             <tr>
-                <td>${r.uid.substring(0,8)}...</td>
-                <td>${r.type}</td>
+                <td>${r.name}</td> <td>${r.type}</td>
                 <td>${r.start_date} to ${r.end_date}</td>
-                <td>${r.status}</td>
+                <td><strong>${r.status}</strong></td>
                 <td>
                     ${r.status === 'Pending' ? `
                         <button class="btn-success" onclick="app.updateLeaveStatus('${r.leave_id}', 'Approved')">Approve</button>

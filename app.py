@@ -151,6 +151,7 @@ def leaves():
         leave_data = {
             'leave_id': leave_id,
             'uid': data.get('uid'),
+            'name': data.get('name', 'Unknown'), # FIX: Save the employee's name
             'type': data.get('type'),
             'start_date': data.get('start_date'),
             'end_date': data.get('end_date'),
@@ -162,20 +163,38 @@ def leaves():
 
     if request.method == 'GET':
         uid = request.args.get('uid')
+        requester_uid = request.args.get('requester_uid')
+
         if uid:
+            # Employee viewing their own leaves
             records = db.collection('leaves').where('uid', '==', uid).stream()
         else:
+            # Admin viewing ALL leaves
+            if not requester_uid:
+                 return jsonify({'error': 'Unauthorized: Admin ID required'}), 403
+            
+            # Verify the person requesting ALL leaves is actually an Admin
+            requester = db.collection('users').document(requester_uid).get().to_dict()
+            if not requester or requester.get('role') != 'Admin':
+                 return jsonify({'error': 'Unauthorized access'}), 403
+
             records = db.collection('leaves').stream()
-        
-        data = [r.to_dict() for r in records]
+
+        # Process records and grab missing names for any old data you already created
+        data = []
+        for r in records:
+            leave = r.to_dict()
+            if 'name' not in leave:
+                # Fallback check if it's an old record without a name
+                user_doc = db.collection('users').document(leave.get('uid')).get()
+                leave['name'] = user_doc.to_dict().get('name', 'Unknown Employee') if user_doc.exists else 'Unknown'
+            data.append(leave)
+
         return jsonify(data), 200
     
     if request.method == 'PUT':
         data = request.json
         leave_id = data.get('leave_id')
-        status = data.get('status') # 'Approved' or 'Rejected'
+        status = data.get('status')
         db.collection('leaves').document(leave_id).update({'status': status})
         return jsonify({'message': f'Leave {status.lower()} successfully'}), 200
-
-if __name__ == '__main__':
-    app.run(debug=True)
