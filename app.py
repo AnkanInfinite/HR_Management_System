@@ -198,3 +198,6 @@ def leaves():
         status = data.get('status')
         db.collection('leaves').document(leave_id).update({'status': status})
         return jsonify({'message': f'Leave {status.lower()} successfully'}), 200
+if __name__ == '__main__':
+    app.run(debug=True)
+            
