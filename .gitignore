@@ -4,4 +4,7 @@ env/
 
 # Python cache files
 __pycache__/
-*.pyccredentials.json
+*.pyc
+
+#Secrect Keys
+credentials.json
