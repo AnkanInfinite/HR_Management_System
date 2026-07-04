@@ -68,13 +68,14 @@
             <div class="dashboard-grid">
                 
                 <aside class="sidebar">
-                    <ul class="sidebar-menu">
-                        <li onclick="app.showTab('profile')"><i class="fas fa-user"></i> Profile</li>
-                        <li onclick="app.showTab('attendance')"><i class="fas fa-clock"></i> Attendance</li>
-                        <li onclick="app.showTab('leaves')"><i class="fas fa-calendar-alt"></i> Leave / Time-Off</li>
-                        <li id="admin-menu-leaves" class="hidden" onclick="app.showTab('admin-leaves')"><i class="fas fa-check-circle"></i> Leave Approvals</li>
-                    </ul>
-                </aside>
+    <ul class="sidebar-menu">
+        <li onclick="app.showTab('profile')"><i class="fas fa-user"></i> Profile</li>
+        <li onclick="app.showTab('attendance')"><i class="fas fa-clock"></i> Attendance</li>
+        <li onclick="app.showTab('leaves')"><i class="fas fa-calendar-alt"></i> Leave / Time-Off</li>
+        <li id="admin-menu-leaves" class="hidden" onclick="app.showTab('admin-leaves')"><i class="fas fa-check-circle"></i> Leave Approvals</li>
+        <li id="admin-menu-employees" class="hidden" onclick="app.showTab('admin-employees')"><i class="fas fa-users"></i> Manage Employees</li>
+    </ul>
+</aside>
 
                 <div class="content-area">
                     <div id="tab-profile" class="tab-content active-tab">
@@ -142,15 +143,42 @@
                         </div>
                     </div>
 
-                    <div id="tab-admin-leaves" class="tab-content hidden">
-                        <h3>Leave Approvals</h3>
-                        <div class="card">
-                            <table class="data-table">
-                                <thead><tr><th>Employee UID</th><th>Type</th><th>Dates</th><th>Status</th><th>Action</th></tr></thead>
-                                <tbody id="admin-leaves-tbody"></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div id="tab-admin-employees" class="tab-content hidden">
+    <h3>Manage Employees</h3>
+    
+    <div class="card">
+        <table class="data-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Job Title</th><th>Action</th></tr></thead>
+            <tbody id="admin-employees-tbody"></tbody>
+        </table>
+    </div>
+    
+    <div id="admin-edit-employee-section" class="card mt-3 hidden">
+        <h4>Edit Employee Details</h4>
+        <form id="admin-employee-form">
+            <input type="hidden" id="edit-emp-uid">
+            <div class="form-row">
+                <div class="form-group"><label>Name</label><input type="text" id="edit-emp-name" required></div>
+                <div class="form-group"><label>Role</label>
+                    <select id="edit-emp-role">
+                        <option value="Employee">Employee</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Phone</label><input type="text" id="edit-emp-phone"></div>
+                <div class="form-group"><label>Address</label><input type="text" id="edit-emp-address"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Job Title</label><input type="text" id="edit-emp-job"></div>
+                <div class="form-group"><label>Salary</label><input type="number" id="edit-emp-salary"></div>
+            </div>
+            <button type="submit" class="btn-primary mt-3">Save Changes</button>
+            <button type="button" class="btn-danger mt-3" onclick="document.getElementById('admin-edit-employee-section').classList.add('hidden')">Cancel</button>
+        </form>
+    </div>
+</div>
 
                 </div>
             </div>

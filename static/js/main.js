@@ -15,6 +15,7 @@ const app = {
         document.getElementById('signup-form').addEventListener('submit', (e) => this.signup(e));
         document.getElementById('profile-form').addEventListener('submit', (e) => this.updateProfile(e));
         document.getElementById('leave-form').addEventListener('submit', (e) => this.applyLeave(e));
+        document.getElementById('admin-employee-form').addEventListener('submit', (e) => this.saveEmployeeChanges(e));
     },
 
     toggleAuth() {
@@ -81,11 +82,81 @@ const app = {
         document.getElementById('navbar').classList.remove('hidden');
         document.getElementById('nav-user-name').innerText = `Welcome, ${this.user.name} (${this.user.role})`;
 
+        // FIX: Force hide admin menus by default to prevent cross-login bugs
+        document.getElementById('admin-menu-leaves').classList.add('hidden');
+        document.getElementById('admin-menu-employees').classList.add('hidden');
+
+        // Only reveal if actually an Admin
         if (this.user.role === 'Admin') {
             document.getElementById('admin-menu-leaves').classList.remove('hidden');
+            document.getElementById('admin-menu-employees').classList.remove('hidden');
         }
 
         this.showTab('profile');
+    },
+
+    async loadAdminEmployees() {
+        // FIX: Pass requester_uid to prove Admin status
+        const users = await this.request(`/api/users?requester_uid=${this.user.uid}`);
+        
+        if (users.error) {
+            alert(users.error); // Will alert if an employee somehow triggers this
+            return;
+        }
+
+        const tbody = document.getElementById('admin-employees-tbody');
+        tbody.innerHTML = users.map(u => `
+            <tr>
+                <td>${u.name}</td>
+                <td>${u.email}</td>
+                <td>${u.role}</td>
+                <td>${u.job_title || 'New Employee'}</td>
+                <td>
+                    <button class="btn-primary" onclick="app.editEmployee('${u.uid}')">Edit</button>
+                </td>
+            </tr>
+        `).join('');
+        
+        document.getElementById('admin-edit-employee-section').classList.add('hidden');
+    },
+
+async editEmployee(uid) {
+    // Fetch fresh data for the selected employee
+    const user = await this.request(`/api/users/${uid}`);
+    
+    // Populate form
+    document.getElementById('edit-emp-uid').value = user.uid;
+    document.getElementById('edit-emp-name').value = user.name || '';
+    document.getElementById('edit-emp-role').value = user.role || 'Employee';
+    document.getElementById('edit-emp-phone').value = user.phone || '';
+    document.getElementById('edit-emp-address').value = user.address || '';
+    document.getElementById('edit-emp-job').value = user.job_title || '';
+    document.getElementById('edit-emp-salary').value = user.salary || '';
+    
+    // Show form
+    document.getElementById('admin-edit-employee-section').classList.remove('hidden');
+    
+    // Scroll to form
+    document.getElementById('admin-edit-employee-section').scrollIntoView({ behavior: 'smooth' });
+},
+
+async saveEmployeeChanges(e) {
+        e.preventDefault();
+        const uid = document.getElementById('edit-emp-uid').value;
+        const data = {
+            requester_uid: this.user.uid, // FIX: Tell backend an Admin is requesting
+            name: document.getElementById('edit-emp-name').value,
+            role: document.getElementById('edit-emp-role').value,
+            phone: document.getElementById('edit-emp-phone').value,
+            address: document.getElementById('edit-emp-address').value,
+            job_title: document.getElementById('edit-emp-job').value,
+            salary: document.getElementById('edit-emp-salary').value
+        };
+        
+        await this.request(`/api/users/${uid}`, 'PUT', data);
+        alert('Employee details updated successfully');
+        
+        this.loadAdminEmployees(); 
     },
 
     showTab(tabId) {
@@ -96,6 +167,7 @@ const app = {
         if (tabId === 'attendance') this.loadAttendance();
         if (tabId === 'leaves') this.loadLeaves();
         if (tabId === 'admin-leaves') this.loadAdminLeaves();
+        if (tabId === 'admin-employees') this.loadAdminEmployees(); // NEW
     },
 
     async loadProfile() {
@@ -111,6 +183,7 @@ const app = {
     async updateProfile(e) {
         e.preventDefault();
         const data = {
+            requester_uid: this.user.uid, // FIX: Tell backend who is requesting
             name: document.getElementById('prof-name').value,
             phone: document.getElementById('prof-phone').value,
             address: document.getElementById('prof-address').value

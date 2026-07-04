@@ -57,6 +57,24 @@ def login():
     return jsonify({'message': 'Login successful', 'user': user_data}), 200
 
 # --- Profile Management ---
+
+# --- Admin: Get All Users ---
+@app.route('/api/users', methods=['GET'])
+def get_all_users():
+    # SECURITY: Verify the requester is an Admin
+    requester_uid = request.args.get('requester_uid')
+    requester = db.collection('users').document(requester_uid).get().to_dict()
+    
+    if not requester or requester.get('role') != 'Admin':
+        return jsonify({'error': 'Unauthorized access'}), 403
+
+    users_ref = db.collection('users').stream()
+    users = [u.to_dict() for u in users_ref]
+    for u in users:
+        u.pop('password', None)
+    return jsonify(users), 200
+
+# --- Profile Management ---
 @app.route('/api/users/<uid>', methods=['GET', 'PUT'])
 def user_profile(uid):
     user_ref = db.collection('users').document(uid)
@@ -70,11 +88,28 @@ def user_profile(uid):
     
     if request.method == 'PUT':
         data = request.json
-        # Only allow updating specific fields
-        update_data = {k: v for k, v in data.items() if k in ['name', 'phone', 'address']}
+        requester_uid = data.get('requester_uid')
+        
+        # Fetch the user making the request to check their role
+        requester_doc = db.collection('users').document(str(requester_uid)).get()
+        if not requester_doc.exists:
+            return jsonify({'error': 'Unauthorized request'}), 403
+            
+        requester_role = requester_doc.to_dict().get('role', 'Employee')
+
+        # SECURITY: Define allowed fields based on role
+        if requester_role == 'Admin':
+            # Admins can edit everything
+            allowed_fields = ['name', 'phone', 'address', 'job_title', 'salary', 'role']
+        else:
+            # Employees can only edit their own basic info
+            if uid != requester_uid:
+                return jsonify({'error': 'Cannot edit another user profile'}), 403
+            allowed_fields = ['name', 'phone', 'address']
+
+        update_data = {k: v for k, v in data.items() if k in allowed_fields}
         user_ref.update(update_data)
         return jsonify({'message': 'Profile updated successfully'}), 200
-
 # --- Attendance Tracking ---
 @app.route('/api/attendance', methods=['POST', 'GET'])
 def attendance():
