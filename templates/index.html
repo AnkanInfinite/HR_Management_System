@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> HR Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <div id="login-section" class="active">
+            <div class="login-card">
+                <h2>HRMS Sign In</h2>
+                <form id="login-form">
+                    <input type="email" id="email" placeholder="Employee Email" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="submit" class="btn primary-btn">Sign In</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="dashboard-section" class="hidden">
+            <nav class="sidebar">
+                <div class="logo">Odoo HRMS</div>
+                <ul class="nav-links">
+                    <li onclick="showTab('profile')"><i class="fas fa-user"></i> My Profile</li>
+                    <li onclick="showTab('attendance')"><i class="fas fa-calendar-check"></i> Attendance</li>
+                    <li onclick="showTab('leave')"><i class="fas fa-plane-departure"></i> Time Off</li>
+                    <li onclick="showTab('payroll')"><i class="fas fa-money-check-alt"></i> Salary Info</li>
+                    <li onclick="logout()" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</li>
+                </ul>
+            </nav>
+            
+            <main class="content">
+                <header>
+                    <h1 id="page-title">My Profile</h1>
+                </header>
+                
+                <div id="profile" class="tab-content active">
+                    <div class="card profile-card">
+                        <img src="https://via.placeholder.com/120" alt="Profile" class="avatar">
+                        <div class="info">
+                            <h2 id="prof-name">Loading...</h2>
+                            <p id="prof-role" class="subtitle">Loading...</p>
+                            <div class="contact-info">
+                                <span><i class="fas fa-envelope"></i> <span id="prof-email"></span></span>
+                                <span><i class="fas fa-phone"></i> <span id="prof-mobile"></span></span>
+                                <span><i class="fas fa-building"></i> <span id="prof-dept"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="attendance" class="tab-content hidden">
+                    <div class="card">
+                        <h2>Daily Check-In</h2>
+                        <div class="action-grid">
+                            <button class="btn present" onclick="markAttendance('Present')">Present (Check In)</button>
+                            <button class="btn halfday" onclick="markAttendance('Half-day')">Half Day</button>
+                            <button class="btn absent" onclick="markAttendance('Absent')">Absent</button>
+                        </div>
+                        <p id="attendance-status" class="status-msg"></p>
+                    </div>
+                </div>
+
+                <div id="leave" class="tab-content hidden">
+                    <div class="card">
+                        <h2>Apply for Leave</h2>
+                        <form id="leave-form">
+                            <select id="leave-type" required>
+                                <option value="" disabled selected>Select Leave Type</option>
+                                <option value="Paid">Paid Leave</option>
+                                <option value="Sick">Sick Leave</option>
+                                <option value="Unpaid">Unpaid Leave</option>
+                            </select>
+                            <div class="date-group">
+                                <input type="date" id="leave-start" required>
+                                <input type="date" id="leave-end" required>
+                            </div>
+                            <textarea id="leave-remarks" placeholder="Remarks / Reason" rows="3" required></textarea>
+                            <button type="submit" class="btn primary-btn">Submit Request</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="payroll" class="tab-content hidden">
+                    <div class="card">
+                        <h2>Monthly Wage Components</h2>
+                        <div class="payroll-stats">
+                            <div class="stat">
+                                <h3>Basic Salary</h3>
+                                <p>₹ 25,000.00</p>
+                            </div>
+                            <div class="stat">
+                                <h3>Allowances (HRA, Fixed)</h3>
+                                <p>₹ 12,500.00</p>
+                            </div>
+                            <div class="stat total">
+                                <h3>Net Monthly</h3>
+                                <p>₹ 37,500.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
